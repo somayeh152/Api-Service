@@ -1,4 +1,5 @@
 import './App.css';
+import MyComponent from "./components/MyComponent";
 
 function App() {
   return (
@@ -6,6 +7,7 @@ function App() {
       <p className="read-the-docs">
         API SERVICE
       </p>
+        <MyComponent />
     </>
   )
 }
