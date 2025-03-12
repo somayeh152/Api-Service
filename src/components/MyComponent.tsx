@@ -1,44 +1,13 @@
 import {FC} from "react";
-import { useQuery, useMutation, useQueryClient } from "react-query";
-import api from "../api/api";
-
-type PostProps = {
-    id?: number,
-    userId?: number,
-    title?: string,
-    body?: string,
-}
-
-const fetchPosts = async ():Promise<PostProps[]> => {
-    const { data } = await api.get("/posts");
-    return data;
-};
-
-const addPost = async (newPost: Omit<PostProps, "id">) => {
-    const { data } = await api.post("/posts", newPost);
-    return data;
-};
+import { PostProps } from '../types/types';
+import { usePostsQuery, useAddPostMutation } from "../hooks";
 
 const MyComponent: FC<PostProps> = () => {
-    const queryClient = useQueryClient();
+    const postsQuery = usePostsQuery();
+    const addMutation = useAddPostMutation();
 
-    const { data, error, isLoading } = useQuery<PostProps[]>({
-        queryKey: ["posts"],
-        queryFn: fetchPosts,
-    });
-
-    const addMutation = useMutation({
-        mutationFn: addPost,
-        onMutate: () => console.log("sending data..."),
-        onSuccess: () => {
-            console.log("post successfully added.");
-            queryClient.invalidateQueries(["posts"]);
-        },
-        onError: (error) => console.error("error", error),
-    });
-
-    if (isLoading) return <p>Loading...</p>;
-    if (error instanceof Error) return <p>Error: {error.message}</p>;
+    if (postsQuery?.isLoading) return <p>Loading...</p>;
+    if (postsQuery?.error instanceof Error) return <p>Error: {postsQuery?.error.message}</p>;
 
     return (
         <div>
@@ -49,7 +18,7 @@ const MyComponent: FC<PostProps> = () => {
                 Add Post
             </button>
             <ul>
-                {data?.map((post: PostProps) => (
+                {postsQuery?.data?.map((post: PostProps) => (
                     <li key={post.id}>{post.title}</li>
                 ))}
             </ul>
